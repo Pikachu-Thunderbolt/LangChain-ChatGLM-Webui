@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Literal
 
 import gradio as gr
 import nltk
@@ -190,11 +190,12 @@ def reinit_model(large_language_model, embedding_model, history):
 
 
 def init_vector_store(file_obj):
-
-    vector_store = knowladge_based_chat_llm.init_knowledge_vector_store(
-        file_obj.name)
-
-    return vector_store
+    try:
+        vector_store = knowladge_based_chat_llm.init_knowledge_vector_store(
+            file_obj.name)
+        return """Vector store successfully initialized!"""
+    except Exception as e:
+        return """Vector store fails to be initialized..."""
 
 
 def predict(input,
@@ -284,7 +285,7 @@ if __name__ == "__main__":
 
                 file = gr.File(label='请上传知识库文件',
                                file_types=['.txt', '.md', '.docx', '.pdf'])
-
+                init_vs_result = gr.Textbox(value="", label="Vector Store Building Result")
                 init_vs = gr.Button("知识库文件向量化")
 
                 use_web = gr.Radio(["True", "False"],
@@ -311,7 +312,7 @@ if __name__ == "__main__":
                 init_vector_store,
                 show_progress=True,
                 inputs=[file],
-                outputs=[],
+                outputs=[init_vs_result],
             )
 
             send.click(predict,
